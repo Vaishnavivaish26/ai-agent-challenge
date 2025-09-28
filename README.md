@@ -222,5 +222,3 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - **OpenAI/Gemini/Groq** for LLM capabilities
 
 ---
-
-**Built with ❤️ by AI Agent Challenge**
