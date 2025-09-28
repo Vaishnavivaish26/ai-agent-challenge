@@ -102,7 +102,6 @@ ai-agent-challenge/
 
 ### User Interface
 - **Streamlit Web App**: Modern, responsive UI
-- **Real-time Logs**: Live progress tracking
 - **Data Visualization**: Interactive DataFrame display
 - **Bank Selection**: Easy target bank switching
 
@@ -119,74 +118,27 @@ python agent.py --target sbi --provider gemini
 
 # Provide API key directly
 python agent.py --target hdfc --provider openai --api-key your-key
+
+# Override sample data paths (useful for new banks without adding files to repo)
+python agent.py \
+  --target sbi \
+  --provider gemini \
+  --pdf "C:/path/to/SBI Statement.pdf" \
+  --csv "C:/path/to/sbi_result.csv"
+
+# Quick 5-step run example for a new bank using custom paths
+python agent.py \
+  --target new_bank \
+  --provider gemini \
+  --pdf "C:/path/to/new_bank sample.pdf" \
+  --csv "C:/path/to/new_bank_result.csv"
 ```
 
 ### Web Interface
 
 1. Start the Streamlit app: `streamlit run app.py`
 2. Select your target bank from the dropdown
-3. Choose your preferred LLM provider
-4. Enter API key (or use environment variable)
-5. Click "Run AI Agent" to start the process
-6. View real-time logs and results
-
-## 🧪 Testing
-
-The agent automatically generates and runs comprehensive tests:
-
-```bash
-# Run tests manually
-pytest tests/ -v
-
-# Run specific bank tests
-pytest tests/test_icici_parser.py -v
-```
-
-### Test Coverage
-- File existence validation
-- DataFrame structure verification
-- Data type checking
-- Data accuracy comparison with expected CSV
-- Error handling for edge cases
-
-## 📊 Sample Data Format
-
-The parser expects bank statements in PDF format and generates DataFrames with these columns:
-
-| Column | Type | Description |
-|--------|------|-------------|
-| Date | datetime | Transaction date (DD-MM-YYYY) |
-| Description | string | Transaction description |
-| Debit | float | Debit amount (if applicable) |
-| Credit | float | Credit amount (if applicable) |
-| Balance | float | Account balance after transaction |
-
-## 🔄 Agent Loop Details
-
-### 1. Plan Phase
-- Analyzes sample CSV data to understand expected format
-- Identifies column structure and data types
-- Prepares context for LLM code generation
-
-### 2. Generate Phase
-- Uses LLM to create parser code based on sample data
-- Generates comprehensive test suite
-- Ensures code follows best practices and requirements
-
-### 3. Test Phase
-- Runs pytest on generated code
-- Validates against sample data
-- Captures detailed test output and errors
-
-### 4. Fix Phase (if needed)
-- Analyzes test failures
-- Generates improved code based on error analysis
-- Retries up to 3 times with learning from previous attempts
-
-## 🎯 Evaluation Priorities
-
-1. **Agent Autonomy** (40%): Self-correcting loop, max 3 attempts, minimal human intervention
-2. **Code Quality** (30%): Typing, docstrings, modular design, clean architecture
+{{ ... }}
 3. **Architecture** (20%): Clear design patterns, reusable functions, maintainable code
 4. **Demo Performance** (10%): <60 second fresh run, agent works and pytest passes
 
@@ -198,11 +150,8 @@ The parser expects bank statements in PDF format and generates DataFrames with t
 2. Include both PDF and expected CSV files
 3. Follow the naming convention: `{bank_name} sample.pdf` and `result.csv`
 
-### Extending LLM Providers
+Or, skip adding files to the repository and use path overrides via CLI:
 
-1. Add provider to `BankParserAgent._init_llm_client()`
-2. Update `generate_parser_code()` and `generate_test_code()` methods
-3. Add provider to CLI arguments and Streamlit UI
 
 ### Customizing Parser Logic
 

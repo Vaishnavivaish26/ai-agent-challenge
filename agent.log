@@ -5667,3 +5667,938 @@ FAILED tests/test_icici_parser.py::TestICICIParser::test_parse_matches_expected_
 2025-09-16 22:15:24,731 - INFO - [PASS] All tests passed!
 2025-09-16 22:15:24,731 - INFO - [SUCCESS] Parser generated and tested successfully in 1 attempt(s)
 2025-09-16 22:15:24,731 - INFO - [COMPLETE] Agent completed successfully!
+2025-09-17 00:18:34,917 - INFO - Initialized Gemini client
+2025-09-17 00:18:34,921 - INFO - [START] Starting agent loop for ICICI bank
+2025-09-17 00:18:35,307 - INFO - [ATTEMPT] Attempt 1/3
+2025-09-17 00:18:35,307 - INFO - [GENERATE] Generating parser code...
+2025-09-17 00:18:40,605 - INFO - Saved parser code to custom_parser\icici_parser.py
+2025-09-17 00:18:40,608 - INFO - [TEST] Running tests...
+2025-09-17 00:18:44,124 - ERROR - [FAIL] Tests failed!
+2025-09-17 00:18:44,125 - ERROR - Test output:
+============================= test session starts =============================
+platform win32 -- Python 3.12.3, pytest-8.4.2, pluggy-1.6.0 -- C:\Users\Vaishnav A\AppData\Local\Programs\Python\Python312\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Vaishnav A\ai-agent-challenge
+plugins: anyio-4.8.0, langsmith-0.3.19
+collecting ... collected 7 items
+
+tests/test_icici_parser.py::TestICICIParser::test_parse_file_exists PASSED [ 14%]
+tests/test_icici_parser.py::TestICICIParser::test_parse_returns_dataframe PASSED [ 28%]
+tests/test_icici_parser.py::TestICICIParser::test_parse_dataframe_structure FAILED [ 42%]
+tests/test_icici_parser.py::TestICICIParser::test_parse_data_types FAILED [ 57%]
+tests/test_icici_parser.py::TestICICIParser::test_parse_matches_expected_data FAILED [ 71%]
+tests/test_icici_parser.py::TestICICIParser::test_parse_handles_missing_file PASSED [ 85%]
+tests/test_icici_parser.py::TestICICIParser::test_parse_handles_invalid_pdf FAILED [100%]
+
+================================== FAILURES ===================================
+_______________ TestICICIParser.test_parse_dataframe_structure ________________
+tests\test_icici_parser.py:88: in test_parse_dataframe_structure
+    assert len(result) > 0, "DataFrame should not be empty"
+E   AssertionError: DataFrame should not be empty
+E   assert 0 > 0
+E    +  where 0 = len(Empty DataFrame\nColumns: [Date, Description, Debit, Credit, Balance]\nIndex: [])
+____________________ TestICICIParser.test_parse_data_types ____________________
+tests\test_icici_parser.py:102: in test_parse_data_types
+    assert pd.api.types.is_numeric_dtype(result[col]), f"{col} column should be numeric type"
+E   AssertionError: Debit column should be numeric type
+E   assert False
+E    +  where False = <function is_numeric_dtype at 0x0000016C44505D00>(Series([], Name: Debit, dtype: object))
+E    +    where <function is_numeric_dtype at 0x0000016C44505D00> = <module 'pandas.api.types' from 'C:\\Users\\Vaishnav A\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\pandas\\api\\types\\__init__.py'>.is_numeric_dtype
+E    +      where <module 'pandas.api.types' from 'C:\\Users\\Vaishnav A\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\pandas\\api\\types\\__init__.py'> = <module 'pandas.api' from 'C:\\Users\\Vaishnav A\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\pandas\\api\\__init__.py'>.types
+E    +        where <module 'pandas.api' from 'C:\\Users\\Vaishnav A\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\pandas\\api\\__init__.py'> = pd.api
+______________ TestICICIParser.test_parse_matches_expected_data _______________
+tests\test_icici_parser.py:143: in test_parse_matches_expected_data
+    assert result_sorted.equals(expected_sorted), \
+E   AssertionError: DataFrames are not equal according to pandas DataFrame.equals()
+E   assert False
+E    +  where False = equals(         Date                       Description    Debit   Credit   Balance\n0  2024-08-01         Salary Credit XYZ Pvt Ltd  1935.30     0.00   6864.58\n1  2024-08-02         Salary Credit XYZ Pvt Ltd     0.00  1652.61   8517.19\n2  2024-08-03           IMPS UPI Payment Amazon  3886.08     0.00   4631.11\n3  2024-08-03           Mobile Recharge Via UPI     0.00  1648.72   6279.83\n4  2024-08-14          Fuel Purchase Debit Card     0.00  3878.57  10158.40\n..        ...                               ...      ...      ...       ...\n95 2025-07-20  Utility Bill Payment Electricity     0.00  2989.23   3926.14\n96 2025-07-23         Salary Credit XYZ Pvt Ltd     0.00  2988.46   6914.60\n97 2025-07-24      Electricity Bill NEFT Online  2917.52     0.00   3997.08\n98 2025-07-25         Salary Credit XYZ Pvt Ltd   566.32     0.00   3430.76\n99 2025-07-27         ATM Cash Withdrawal India     0.00  2156.01   5586.77\n\n[100 rows x 5 columns])
+E    +    where equals = Empty DataFrame\nColumns: [Date, Description, Debit, Credit, Balance]\nIndex: [].equals
+---------------------------- Captured stdout call -----------------------------
+\u274c DataFrame.equals() returned False\nResult DataFrame shape: (0, 5)\nExpected DataFrame shape: (100, 5)\nResult dtypes:\nDate           datetime64[ns]\nDescription            object\nDebit                  object\nCredit                 object\nBalance                object\ndtype: object\nExpected dtypes:\nDate           datetime64[ns]\nDescription            object\nDebit                 float64\nCredit                float64\nBalance               float64\ndtype: object\n\nFirst 5 rows of result:\nEmpty DataFrame\nColumns: [Date, Description, Debit, Credit, Balance]\nIndex: []\n\nFirst 5 rows of expected:\n        Date                Description    Debit   Credit   Balance\n0 2024-08-01  Salary Credit XYZ Pvt Ltd  1935.30     0.00   6864.58\n1 2024-08-02  Salary Credit XYZ Pvt Ltd     0.00  1652.61   8517.19\n2 2024-08-03    IMPS UPI Payment Amazon  3886.08     0.00   4631.11\n3 2024-08-03    Mobile Recharge Via UPI     0.00  1648.72   6279.83\n4 2024-08-14   Fuel Purchase Debit Card     0.00  3878.57  10158.40\n\u274c Error during comparison: DataFrames are not equal according to pandas DataFrame.equals()\nassert False\n +  where False = equals(         Date                       Description    Debit   Credit   Balance\\n0  2024-08-01         Salary Credit XYZ Pvt Ltd  1935.30     0.00   6864.58\\n1  2024-08-02         Salary Credit XYZ Pvt Ltd     0.00  1652.61   8517.19\\n2  2024-08-03           IMPS UPI Payment Amazon  3886.08     0.00   4631.11\\n3  2024-08-03           Mobile Recharge Via UPI     0.00  1648.72   6279.83\\n4  2024-08-14          Fuel Purchase Debit Card     0.00  3878.57  10158.40\\n..        ...                               ...      ...      ...       ...\\n95 2025-07-20  Utility Bill Payment Electricity     0.00  2989.23   3926.14\\n96 2025-07-23         Salary Credit XYZ Pvt Ltd     0.00  2988.46   6914.60\\n97 2025-07-24      Electricity Bill NEFT Online  2917.52     0.00   3997.08\\n98 2025-07-25         Salary Credit XYZ Pvt Ltd   566.32     0.00   3430.76\\n99 2025-07-27         ATM Cash Withdrawal India     0.00  2156.01   5586.77\\n\\n[100 rows x 5 columns])\n +    where equals = Empty DataFrame\\nColumns: [Date, Description, Debit, Credit, Balance]\\nIndex: [].equals
+_______________ TestICICIParser.test_parse_handles_invalid_pdf ________________
+..\AppData\Local\Programs\Python\Python312\Lib\site-packages\pdfplumber\pdf.py:50: in __init__
+    self.doc = PDFDocument(PDFParser(stream), password=password or "")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\AppData\Local\Programs\Python\Python312\Lib\site-packages\pdfminer\pdfdocument.py:752: in __init__
+    raise PDFSyntaxError("No /Root object! - Is this really a PDF?")
+E   pdfminer.pdfparser.PDFSyntaxError: No /Root object! - Is this really a PDF?
+
+During handling of the above exception, another exception occurred:
+custom_parser\icici_parser.py:7: in parse
+    with pdfplumber.open(pdf_path) as pdf:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+..\AppData\Local\Programs\Python\Python312\Lib\site-packages\pdfplumber\pdf.py:107: in open
+    return cls(
+..\AppData\Local\Programs\Python\Python312\Lib\site-packages\pdfplumber\pdf.py:52: in __init__
+    raise PdfminerException(e)
+E   pdfplumber.utils.exceptions.PdfminerException: No /Root object! - Is this really a PDF?
+
+During handling of the above exception, another exception occurred:
+tests\test_icici_parser.py:162: in test_parse_handles_invalid_pdf
+    parse(str(dummy_file))
+custom_parser\icici_parser.py:37: in parse
+    except pdfplumber.pdf.EmptyFileError:
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: module 'pdfplumber.pdf' has no attribute 'EmptyFileError'
+=========================== short test summary info ===========================
+FAILED tests/test_icici_parser.py::TestICICIParser::test_parse_dataframe_structure
+FAILED tests/test_icici_parser.py::TestICICIParser::test_parse_data_types - A...
+FAILED tests/test_icici_parser.py::TestICICIParser::test_parse_matches_expected_data
+FAILED tests/test_icici_parser.py::TestICICIParser::test_parse_handles_invalid_pdf
+========================= 4 failed, 3 passed in 1.61s =========================
+
+2025-09-17 00:18:44,126 - WARNING - [FAILED] Attempt 1 failed. Test output:
+============================= test session starts =============================
+platform win32 -- Python 3.12.3, pytest-8.4.2, pluggy-1.6.0 -- C:\Users\Vaishnav A\AppData\Local\Programs\Python\Python312\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Vaishnav A\ai-agent-challenge
+plugins: anyio-4.8.0, langsmith-0.3.19
+collecting ... collected 7 items
+
+tests/test_icici_parser.py::TestICICIParser::test_parse_file_exists PASSED [ 14%]
+tests/test_icici_parser.py::TestICICIParser::test_parse_returns_dataframe PASSED [ 28%]
+tests/test_icici_parser.py::TestICICIParser::test_parse_dataframe_structure FAILED [ 42%]
+tests/test_icici_parser.py::TestICICIParser::test_parse_data_types FAILED [ 57%]
+tests/test_icici_parser.py::TestICICIParser::test_parse_matches_expected_data FAILED [ 71%]
+tests/test_icici_parser.py::TestICICIParser::test_parse_handles_missing_file PASSED [ 85%]
+tests/test_icici_parser.py::TestICICIParser::test_parse_handles_invalid_pdf FAILED [100%]
+
+================================== FAILURES ===================================
+_______________ TestICICIParser.test_parse_dataframe_structure ________________
+tests\test_icici_parser.py:88: in test_parse_dataframe_structure
+    assert len(result) > 0, "DataFrame should not be empty"
+E   AssertionError: DataFrame should not be empty
+E   assert 0 > 0
+E    +  where 0 = len(Empty DataFrame\nColumns: [Date, Description, Debit, Credit, Balance]\nIndex: [])
+____________________ TestICICIParser.test_parse_data_types ____________________
+tests\test_icici_parser.py:102: in test_parse_data_types
+    assert pd.api.types.is_numeric_dtype(result[col]), f"{col} column should be numeric type"
+E   AssertionError: Debit column should be numeric type
+E   assert False
+E    +  where False = <function is_numeric_dtype at 0x0000016C44505D00>(Series([], Name: Debit, dtype: object))
+E    +    where <function is_numeric_dtype at 0x0000016C44505D00> = <module 'pandas.api.types' from 'C:\\Users\\Vaishnav A\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\pandas\\api\\types\\__init__.py'>.is_numeric_dtype
+E    +      where <module 'pandas.api.types' from 'C:\\Users\\Vaishnav A\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\pandas\\api\\types\\__init__.py'> = <module 'pandas.api' from 'C:\\Users\\Vaishnav A\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\pandas\\api\\__init__.py'>.types
+E    +        where <module 'pandas.api' from 'C:\\Users\\Vaishnav A\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\pandas\\api\\__init__.py'> = pd.api
+______________ TestICICIParser.test_parse_matches_expected_data _______________
+tests\test_icici_parser.py:143: in test_parse_matches_expected_data
+    assert result_sorted.equals(expected_sorted), \
+E   AssertionError: DataFrames are not equal according to pandas DataFrame.equals()
+E   assert False
+E    +  where False = equals(         Date                       Description    Debit   Credit   Balance\n0  2024-08-01         Salary Credit XYZ Pvt Ltd  1935.30     0.00   6864.58\n1  2024-08-02         Salary Credit XYZ Pvt Ltd     0.00  1652.61   8517.19\n2  2024-08-03           IMPS UPI Payment Amazon  3886.08     0.00   4631.11\n3  2024-08-03           Mobile Recharge Via UPI     0.00  1648.72   6279.83\n4  2024-08-14          Fuel Purchase Debit Card     0.00  3878.57  10158.40\n..        ...                               ...      ...      ...       ...\n95 2025-07-20  Utility Bill Payment Electricity     0.00  2989.23   3926.14\n96 2025-07-23         Salary Credit XYZ Pvt Ltd     0.00  2988.46   6914.60\n97 2025-07-24      Electricity Bill NEFT Online  2917.52     0.00   3997.08\n98 2025-07-25         Salary Credit XYZ Pvt Ltd   566.32     0.00   3430.76\n99 2025-07-27         ATM Cash Withdrawal India     0.00  2156.01   5586.77\n\n[100 rows x 5 columns])
+E    +    where equals = Empty DataFrame\nColumns: [Date, Description, Debit, Credit, Balance]\nIndex: [].equals
+---------------------------- Captured stdout call -----------------------------
+\u274c DataFrame.equals() returned False\nResult DataFrame shape: (0, 5)\nExpected DataFrame shape: (100, 5)\nResult dtypes:\nDate           datetime64[ns]\nDescription            object\nDebit                  object\nCredit                 object\nBalance                object\ndtype: object\nExpected dtypes:\nDate           datetime64[ns]\nDescription            object\nDebit                 float64\nCredit                float64\nBalance               float64\ndtype: object\n\nFirst 5 rows of result:\nEmpty DataFrame\nColumns: [Date, Description, Debit, Credit, Balance]\nIndex: []\n\nFirst 5 rows of expected:\n        Date                Description    Debit   Credit   Balance\n0 2024-08-01  Salary Credit XYZ Pvt Ltd  1935.30     0.00   6864.58\n1 2024-08-02  Salary Credit XYZ Pvt Ltd     0.00  1652.61   8517.19\n2 2024-08-03    IMPS UPI Payment Amazon  3886.08     0.00   4631.11\n3 2024-08-03    Mobile Recharge Via UPI     0.00  1648.72   6279.83\n4 2024-08-14   Fuel Purchase Debit Card     0.00  3878.57  10158.40\n\u274c Error during comparison: DataFrames are not equal according to pandas DataFrame.equals()\nassert False\n +  where False = equals(         Date                       Description    Debit   Credit   Balance\\n0  2024-08-01         Salary Credit XYZ Pvt Ltd  1935.30     0.00   6864.58\\n1  2024-08-02         Salary Credit XYZ Pvt Ltd     0.00  1652.61   8517.19\\n2  2024-08-03           IMPS UPI Payment Amazon  3886.08     0.00   4631.11\\n3  2024-08-03           Mobile Recharge Via UPI     0.00  1648.72   6279.83\\n4  2024-08-14          Fuel Purchase Debit Card     0.00  3878.57  10158.40\\n..        ...                               ...      ...      ...       ...\\n95 2025-07-20  Utility Bill Payment Electricity     0.00  2989.23   3926.14\\n96 2025-07-23         Salary Credit XYZ Pvt Ltd     0.00  2988.46   6914.60\\n97 2025-07-24      Electricity Bill NEFT Online  2917.52     0.00   3997.08\\n98 2025-07-25         Salary Credit XYZ Pvt Ltd   566.32     0.00   3430.76\\n99 2025-07-27         ATM Cash Withdrawal India     0.00  2156.01   5586.77\\n\\n[100 rows x 5 columns])\n +    where equals = Empty DataFrame\\nColumns: [Date, Description, Debit, Credit, Balance]\\nIndex: [].equals
+_______________ TestICICIParser.test_parse_handles_invalid_pdf ________________
+..\AppData\Local\Programs\Python\Python312\Lib\site-packages\pdfplumber\pdf.py:50: in __init__
+    self.doc = PDFDocument(PDFParser(stream), password=password or "")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\AppData\Local\Programs\Python\Python312\Lib\site-packages\pdfminer\pdfdocument.py:752: in __init__
+    raise PDFSyntaxError("No /Root object! - Is this really a PDF?")
+E   pdfminer.pdfparser.PDFSyntaxError: No /Root object! - Is this really a PDF?
+
+During handling of the above exception, another exception occurred:
+custom_parser\icici_parser.py:7: in parse
+    with pdfplumber.open(pdf_path) as pdf:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+..\AppData\Local\Programs\Python\Python312\Lib\site-packages\pdfplumber\pdf.py:107: in open
+    return cls(
+..\AppData\Local\Programs\Python\Python312\Lib\site-packages\pdfplumber\pdf.py:52: in __init__
+    raise PdfminerException(e)
+E   pdfplumber.utils.exceptions.PdfminerException: No /Root object! - Is this really a PDF?
+
+During handling of the above exception, another exception occurred:
+tests\test_icici_parser.py:162: in test_parse_handles_invalid_pdf
+    parse(str(dummy_file))
+custom_parser\icici_parser.py:37: in parse
+    except pdfplumber.pdf.EmptyFileError:
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: module 'pdfplumber.pdf' has no attribute 'EmptyFileError'
+=========================== short test summary info ===========================
+FAILED tests/test_icici_parser.py::TestICICIParser::test_parse_dataframe_structure
+FAILED tests/test_icici_parser.py::TestICICIParser::test_parse_data_types - A...
+FAILED tests/test_icici_parser.py::TestICICIParser::test_parse_matches_expected_data
+FAILED tests/test_icici_parser.py::TestICICIParser::test_parse_handles_invalid_pdf
+========================= 4 failed, 3 passed in 1.61s =========================
+
+2025-09-17 00:18:44,126 - INFO - [RETRY] Retrying with improved code...
+2025-09-17 00:18:44,127 - INFO - [ATTEMPT] Attempt 2/3
+2025-09-17 00:18:44,127 - INFO - [GENERATE] Generating parser code...
+2025-09-17 00:18:49,925 - INFO - Saved parser code to custom_parser\icici_parser.py
+2025-09-17 00:18:49,926 - INFO - [TEST] Running tests...
+2025-09-17 00:18:53,892 - INFO - [PASS] All tests passed!
+2025-09-17 00:18:53,892 - INFO - [SUCCESS] Parser generated and tested successfully in 2 attempt(s)
+2025-09-17 00:18:53,892 - INFO - [COMPLETE] Agent completed successfully!
+2025-09-17 00:19:35,028 - INFO - Initialized Gemini client
+2025-09-17 00:19:35,029 - INFO - [START] Starting agent loop for ICICI bank
+2025-09-17 00:19:35,381 - INFO - [ATTEMPT] Attempt 1/3
+2025-09-17 00:19:35,381 - INFO - [GENERATE] Generating parser code...
+2025-09-17 00:19:39,794 - INFO - Saved parser code to custom_parser\icici_parser.py
+2025-09-17 00:19:39,795 - INFO - [TEST] Running tests...
+2025-09-17 00:19:43,665 - ERROR - [FAIL] Tests failed!
+2025-09-17 00:19:43,665 - ERROR - Test output:
+============================= test session starts =============================
+platform win32 -- Python 3.12.3, pytest-8.4.2, pluggy-1.6.0 -- C:\Users\Vaishnav A\AppData\Local\Programs\Python\Python312\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Vaishnav A\ai-agent-challenge
+plugins: anyio-4.8.0, langsmith-0.3.19
+collecting ... collected 7 items
+
+tests/test_icici_parser.py::TestICICIParser::test_parse_file_exists PASSED [ 14%]
+tests/test_icici_parser.py::TestICICIParser::test_parse_returns_dataframe FAILED [ 28%]
+tests/test_icici_parser.py::TestICICIParser::test_parse_dataframe_structure FAILED [ 42%]
+tests/test_icici_parser.py::TestICICIParser::test_parse_data_types FAILED [ 57%]
+tests/test_icici_parser.py::TestICICIParser::test_parse_matches_expected_data FAILED [ 71%]
+tests/test_icici_parser.py::TestICICIParser::test_parse_handles_missing_file PASSED [ 85%]
+tests/test_icici_parser.py::TestICICIParser::test_parse_handles_invalid_pdf PASSED [100%]
+
+================================== FAILURES ===================================
+________________ TestICICIParser.test_parse_returns_dataframe _________________
+tests\test_icici_parser.py:73: in test_parse_returns_dataframe
+    result = parse(sample_pdf_path)
+             ^^^^^^^^^^^^^^^^^^^^^^
+custom_parser\icici_parser.py:42: in parse
+    df['Date'] = pd.to_datetime(df['Date'], format='%d-%m-%Y')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\core\tools\datetimes.py:1067: in to_datetime
+    values = convert_listlike(arg._values, format)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\core\tools\datetimes.py:433: in _convert_listlike_datetimes
+    return _array_strptime_with_fallback(arg, name, utc, format, exact, errors)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\core\tools\datetimes.py:467: in _array_strptime_with_fallback
+    result, tz_out = array_strptime(arg, fmt, exact=exact, errors=errors, utc=utc)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+strptime.pyx:501: in pandas._libs.tslibs.strptime.array_strptime
+    ???
+strptime.pyx:451: in pandas._libs.tslibs.strptime.array_strptime
+    ???
+strptime.pyx:587: in pandas._libs.tslibs.strptime._parse_with_format
+    ???
+E   ValueError: unconverted data remains when parsing with format "%d-%m-%Y": "-Salary-Credit", at position 0. You might want to try:
+E       - passing `format` if your strings have a consistent format;
+E       - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+E       - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+_______________ TestICICIParser.test_parse_dataframe_structure ________________
+tests\test_icici_parser.py:81: in test_parse_dataframe_structure
+    result = parse(sample_pdf_path)
+             ^^^^^^^^^^^^^^^^^^^^^^
+custom_parser\icici_parser.py:42: in parse
+    df['Date'] = pd.to_datetime(df['Date'], format='%d-%m-%Y')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\core\tools\datetimes.py:1067: in to_datetime
+    values = convert_listlike(arg._values, format)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\core\tools\datetimes.py:433: in _convert_listlike_datetimes
+    return _array_strptime_with_fallback(arg, name, utc, format, exact, errors)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\core\tools\datetimes.py:467: in _array_strptime_with_fallback
+    result, tz_out = array_strptime(arg, fmt, exact=exact, errors=errors, utc=utc)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+strptime.pyx:501: in pandas._libs.tslibs.strptime.array_strptime
+    ???
+strptime.pyx:451: in pandas._libs.tslibs.strptime.array_strptime
+    ???
+strptime.pyx:587: in pandas._libs.tslibs.strptime._parse_with_format
+    ???
+E   ValueError: unconverted data remains when parsing with format "%d-%m-%Y": "-Salary-Credit", at position 0. You might want to try:
+E       - passing `format` if your strings have a consistent format;
+E       - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+E       - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+____________________ TestICICIParser.test_parse_data_types ____________________
+tests\test_icici_parser.py:95: in test_parse_data_types
+    result = parse(sample_pdf_path)
+             ^^^^^^^^^^^^^^^^^^^^^^
+custom_parser\icici_parser.py:42: in parse
+    df['Date'] = pd.to_datetime(df['Date'], format='%d-%m-%Y')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\core\tools\datetimes.py:1067: in to_datetime
+    values = convert_listlike(arg._values, format)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\core\tools\datetimes.py:433: in _convert_listlike_datetimes
+    return _array_strptime_with_fallback(arg, name, utc, format, exact, errors)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\core\tools\datetimes.py:467: in _array_strptime_with_fallback
+    result, tz_out = array_strptime(arg, fmt, exact=exact, errors=errors, utc=utc)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+strptime.pyx:501: in pandas._libs.tslibs.strptime.array_strptime
+    ???
+strptime.pyx:451: in pandas._libs.tslibs.strptime.array_strptime
+    ???
+strptime.pyx:587: in pandas._libs.tslibs.strptime._parse_with_format
+    ???
+E   ValueError: unconverted data remains when parsing with format "%d-%m-%Y": "-Salary-Credit", at position 0. You might want to try:
+E       - passing `format` if your strings have a consistent format;
+E       - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+E       - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+______________ TestICICIParser.test_parse_matches_expected_data _______________
+tests\test_icici_parser.py:109: in test_parse_matches_expected_data
+    result = parse(sample_pdf_path)
+             ^^^^^^^^^^^^^^^^^^^^^^
+custom_parser\icici_parser.py:42: in parse
+    df['Date'] = pd.to_datetime(df['Date'], format='%d-%m-%Y')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\core\tools\datetimes.py:1067: in to_datetime
+    values = convert_listlike(arg._values, format)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\core\tools\datetimes.py:433: in _convert_listlike_datetimes
+    return _array_strptime_with_fallback(arg, name, utc, format, exact, errors)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\core\tools\datetimes.py:467: in _array_strptime_with_fallback
+    result, tz_out = array_strptime(arg, fmt, exact=exact, errors=errors, utc=utc)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+strptime.pyx:501: in pandas._libs.tslibs.strptime.array_strptime
+    ???
+strptime.pyx:451: in pandas._libs.tslibs.strptime.array_strptime
+    ???
+strptime.pyx:587: in pandas._libs.tslibs.strptime._parse_with_format
+    ???
+E   ValueError: unconverted data remains when parsing with format "%d-%m-%Y": "-Salary-Credit", at position 0. You might want to try:
+E       - passing `format` if your strings have a consistent format;
+E       - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+E       - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+=========================== short test summary info ===========================
+FAILED tests/test_icici_parser.py::TestICICIParser::test_parse_returns_dataframe
+FAILED tests/test_icici_parser.py::TestICICIParser::test_parse_dataframe_structure
+FAILED tests/test_icici_parser.py::TestICICIParser::test_parse_data_types - V...
+FAILED tests/test_icici_parser.py::TestICICIParser::test_parse_matches_expected_data
+========================= 4 failed, 3 passed in 2.09s =========================
+
+2025-09-17 00:19:43,666 - WARNING - [FAILED] Attempt 1 failed. Test output:
+============================= test session starts =============================
+platform win32 -- Python 3.12.3, pytest-8.4.2, pluggy-1.6.0 -- C:\Users\Vaishnav A\AppData\Local\Programs\Python\Python312\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Vaishnav A\ai-agent-challenge
+plugins: anyio-4.8.0, langsmith-0.3.19
+collecting ... collected 7 items
+
+tests/test_icici_parser.py::TestICICIParser::test_parse_file_exists PASSED [ 14%]
+tests/test_icici_parser.py::TestICICIParser::test_parse_returns_dataframe FAILED [ 28%]
+tests/test_icici_parser.py::TestICICIParser::test_parse_dataframe_structure FAILED [ 42%]
+tests/test_icici_parser.py::TestICICIParser::test_parse_data_types FAILED [ 57%]
+tests/test_icici_parser.py::TestICICIParser::test_parse_matches_expected_data FAILED [ 71%]
+tests/test_icici_parser.py::TestICICIParser::test_parse_handles_missing_file PASSED [ 85%]
+tests/test_icici_parser.py::TestICICIParser::test_parse_handles_invalid_pdf PASSED [100%]
+
+================================== FAILURES ===================================
+________________ TestICICIParser.test_parse_returns_dataframe _________________
+tests\test_icici_parser.py:73: in test_parse_returns_dataframe
+    result = parse(sample_pdf_path)
+             ^^^^^^^^^^^^^^^^^^^^^^
+custom_parser\icici_parser.py:42: in parse
+    df['Date'] = pd.to_datetime(df['Date'], format='%d-%m-%Y')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\core\tools\datetimes.py:1067: in to_datetime
+    values = convert_listlike(arg._values, format)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\core\tools\datetimes.py:433: in _convert_listlike_datetimes
+    return _array_strptime_with_fallback(arg, name, utc, format, exact, errors)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\core\tools\datetimes.py:467: in _array_strptime_with_fallback
+    result, tz_out = array_strptime(arg, fmt, exact=exact, errors=errors, utc=utc)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+strptime.pyx:501: in pandas._libs.tslibs.strptime.array_strptime
+    ???
+strptime.pyx:451: in pandas._libs.tslibs.strptime.array_strptime
+    ???
+strptime.pyx:587: in pandas._libs.tslibs.strptime._parse_with_format
+    ???
+E   ValueError: unconverted data remains when parsing with format "%d-%m-%Y": "-Salary-Credit", at position 0. You might want to try:
+E       - passing `format` if your strings have a consistent format;
+E       - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+E       - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+_______________ TestICICIParser.test_parse_dataframe_structure ________________
+tests\test_icici_parser.py:81: in test_parse_dataframe_structure
+    result = parse(sample_pdf_path)
+             ^^^^^^^^^^^^^^^^^^^^^^
+custom_parser\icici_parser.py:42: in parse
+    df['Date'] = pd.to_datetime(df['Date'], format='%d-%m-%Y')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\core\tools\datetimes.py:1067: in to_datetime
+    values = convert_listlike(arg._values, format)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\core\tools\datetimes.py:433: in _convert_listlike_datetimes
+    return _array_strptime_with_fallback(arg, name, utc, format, exact, errors)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\core\tools\datetimes.py:467: in _array_strptime_with_fallback
+    result, tz_out = array_strptime(arg, fmt, exact=exact, errors=errors, utc=utc)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+strptime.pyx:501: in pandas._libs.tslibs.strptime.array_strptime
+    ???
+strptime.pyx:451: in pandas._libs.tslibs.strptime.array_strptime
+    ???
+strptime.pyx:587: in pandas._libs.tslibs.strptime._parse_with_format
+    ???
+E   ValueError: unconverted data remains when parsing with format "%d-%m-%Y": "-Salary-Credit", at position 0. You might want to try:
+E       - passing `format` if your strings have a consistent format;
+E       - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+E       - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+____________________ TestICICIParser.test_parse_data_types ____________________
+tests\test_icici_parser.py:95: in test_parse_data_types
+    result = parse(sample_pdf_path)
+             ^^^^^^^^^^^^^^^^^^^^^^
+custom_parser\icici_parser.py:42: in parse
+    df['Date'] = pd.to_datetime(df['Date'], format='%d-%m-%Y')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\core\tools\datetimes.py:1067: in to_datetime
+    values = convert_listlike(arg._values, format)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\core\tools\datetimes.py:433: in _convert_listlike_datetimes
+    return _array_strptime_with_fallback(arg, name, utc, format, exact, errors)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\core\tools\datetimes.py:467: in _array_strptime_with_fallback
+    result, tz_out = array_strptime(arg, fmt, exact=exact, errors=errors, utc=utc)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+strptime.pyx:501: in pandas._libs.tslibs.strptime.array_strptime
+    ???
+strptime.pyx:451: in pandas._libs.tslibs.strptime.array_strptime
+    ???
+strptime.pyx:587: in pandas._libs.tslibs.strptime._parse_with_format
+    ???
+E   ValueError: unconverted data remains when parsing with format "%d-%m-%Y": "-Salary-Credit", at position 0. You might want to try:
+E       - passing `format` if your strings have a consistent format;
+E       - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+E       - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+______________ TestICICIParser.test_parse_matches_expected_data _______________
+tests\test_icici_parser.py:109: in test_parse_matches_expected_data
+    result = parse(sample_pdf_path)
+             ^^^^^^^^^^^^^^^^^^^^^^
+custom_parser\icici_parser.py:42: in parse
+    df['Date'] = pd.to_datetime(df['Date'], format='%d-%m-%Y')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\core\tools\datetimes.py:1067: in to_datetime
+    values = convert_listlike(arg._values, format)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\core\tools\datetimes.py:433: in _convert_listlike_datetimes
+    return _array_strptime_with_fallback(arg, name, utc, format, exact, errors)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\core\tools\datetimes.py:467: in _array_strptime_with_fallback
+    result, tz_out = array_strptime(arg, fmt, exact=exact, errors=errors, utc=utc)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+strptime.pyx:501: in pandas._libs.tslibs.strptime.array_strptime
+    ???
+strptime.pyx:451: in pandas._libs.tslibs.strptime.array_strptime
+    ???
+strptime.pyx:587: in pandas._libs.tslibs.strptime._parse_with_format
+    ???
+E   ValueError: unconverted data remains when parsing with format "%d-%m-%Y": "-Salary-Credit", at position 0. You might want to try:
+E       - passing `format` if your strings have a consistent format;
+E       - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+E       - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+=========================== short test summary info ===========================
+FAILED tests/test_icici_parser.py::TestICICIParser::test_parse_returns_dataframe
+FAILED tests/test_icici_parser.py::TestICICIParser::test_parse_dataframe_structure
+FAILED tests/test_icici_parser.py::TestICICIParser::test_parse_data_types - V...
+FAILED tests/test_icici_parser.py::TestICICIParser::test_parse_matches_expected_data
+========================= 4 failed, 3 passed in 2.09s =========================
+
+2025-09-17 00:19:43,668 - INFO - [RETRY] Retrying with improved code...
+2025-09-17 00:19:43,668 - INFO - [ATTEMPT] Attempt 2/3
+2025-09-17 00:19:43,668 - INFO - [GENERATE] Generating parser code...
+2025-09-17 00:19:44,094 - ERROR - Error generating parser code: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. [violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-1.5-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 50
+}
+, links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, retry_delay {
+  seconds: 16
+}
+]
+2025-09-17 00:19:44,094 - ERROR - [ERROR] Error in attempt 2: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. [violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-1.5-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 50
+}
+, links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, retry_delay {
+  seconds: 16
+}
+]
+2025-09-17 00:19:44,095 - INFO - [RETRY] Retrying...
+2025-09-17 00:19:44,095 - INFO - [ATTEMPT] Attempt 3/3
+2025-09-17 00:19:44,095 - INFO - [GENERATE] Generating parser code...
+2025-09-17 00:19:51,160 - INFO - Saved parser code to custom_parser\icici_parser.py
+2025-09-17 00:19:51,161 - INFO - [TEST] Running tests...
+2025-09-17 00:19:54,974 - ERROR - [FAIL] Tests failed!
+2025-09-17 00:19:54,975 - ERROR - Test output:
+============================= test session starts =============================
+platform win32 -- Python 3.12.3, pytest-8.4.2, pluggy-1.6.0 -- C:\Users\Vaishnav A\AppData\Local\Programs\Python\Python312\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Vaishnav A\ai-agent-challenge
+plugins: anyio-4.8.0, langsmith-0.3.19
+collecting ... collected 7 items
+
+tests/test_icici_parser.py::TestICICIParser::test_parse_file_exists PASSED [ 14%]
+tests/test_icici_parser.py::TestICICIParser::test_parse_returns_dataframe PASSED [ 28%]
+tests/test_icici_parser.py::TestICICIParser::test_parse_dataframe_structure FAILED [ 42%]
+tests/test_icici_parser.py::TestICICIParser::test_parse_data_types PASSED [ 57%]
+tests/test_icici_parser.py::TestICICIParser::test_parse_matches_expected_data FAILED [ 71%]
+tests/test_icici_parser.py::TestICICIParser::test_parse_handles_missing_file PASSED [ 85%]
+tests/test_icici_parser.py::TestICICIParser::test_parse_handles_invalid_pdf PASSED [100%]
+
+================================== FAILURES ===================================
+_______________ TestICICIParser.test_parse_dataframe_structure ________________
+tests\test_icici_parser.py:88: in test_parse_dataframe_structure
+    assert len(result) > 0, "DataFrame should not be empty"
+E   AssertionError: DataFrame should not be empty
+E   assert 0 > 0
+E    +  where 0 = len(Empty DataFrame\nColumns: [Date, Description, Debit, Credit, Balance]\nIndex: [])
+______________ TestICICIParser.test_parse_matches_expected_data _______________
+tests\test_icici_parser.py:143: in test_parse_matches_expected_data
+    assert result_sorted.equals(expected_sorted), \
+E   AssertionError: DataFrames are not equal according to pandas DataFrame.equals()
+E   assert False
+E    +  where False = equals(         Date                       Description    Debit   Credit   Balance\n0  2024-08-01         Salary Credit XYZ Pvt Ltd  1935.30     0.00   6864.58\n1  2024-08-02         Salary Credit XYZ Pvt Ltd     0.00  1652.61   8517.19\n2  2024-08-03           IMPS UPI Payment Amazon  3886.08     0.00   4631.11\n3  2024-08-03           Mobile Recharge Via UPI     0.00  1648.72   6279.83\n4  2024-08-14          Fuel Purchase Debit Card     0.00  3878.57  10158.40\n..        ...                               ...      ...      ...       ...\n95 2025-07-20  Utility Bill Payment Electricity     0.00  2989.23   3926.14\n96 2025-07-23         Salary Credit XYZ Pvt Ltd     0.00  2988.46   6914.60\n97 2025-07-24      Electricity Bill NEFT Online  2917.52     0.00   3997.08\n98 2025-07-25         Salary Credit XYZ Pvt Ltd   566.32     0.00   3430.76\n99 2025-07-27         ATM Cash Withdrawal India     0.00  2156.01   5586.77\n\n[100 rows x 5 columns])
+E    +    where equals = Empty DataFrame\nColumns: [Date, Description, Debit, Credit, Balance]\nIndex: [].equals
+---------------------------- Captured stdout call -----------------------------
+\u274c DataFrame.equals() returned False\nResult DataFrame shape: (0, 5)\nExpected DataFrame shape: (100, 5)\nResult dtypes:\nDate           datetime64[ns]\nDescription            object\nDebit                   int64\nCredit                  int64\nBalance                 int64\ndtype: object\nExpected dtypes:\nDate           datetime64[ns]\nDescription            object\nDebit                 float64\nCredit                float64\nBalance               float64\ndtype: object\n\nFirst 5 rows of result:\nEmpty DataFrame\nColumns: [Date, Description, Debit, Credit, Balance]\nIndex: []\n\nFirst 5 rows of expected:\n        Date                Description    Debit   Credit   Balance\n0 2024-08-01  Salary Credit XYZ Pvt Ltd  1935.30     0.00   6864.58\n1 2024-08-02  Salary Credit XYZ Pvt Ltd     0.00  1652.61   8517.19\n2 2024-08-03    IMPS UPI Payment Amazon  3886.08     0.00   4631.11\n3 2024-08-03    Mobile Recharge Via UPI     0.00  1648.72   6279.83\n4 2024-08-14   Fuel Purchase Debit Card     0.00  3878.57  10158.40\n\u274c Error during comparison: DataFrames are not equal according to pandas DataFrame.equals()\nassert False\n +  where False = equals(         Date                       Description    Debit   Credit   Balance\\n0  2024-08-01         Salary Credit XYZ Pvt Ltd  1935.30     0.00   6864.58\\n1  2024-08-02         Salary Credit XYZ Pvt Ltd     0.00  1652.61   8517.19\\n2  2024-08-03           IMPS UPI Payment Amazon  3886.08     0.00   4631.11\\n3  2024-08-03           Mobile Recharge Via UPI     0.00  1648.72   6279.83\\n4  2024-08-14          Fuel Purchase Debit Card     0.00  3878.57  10158.40\\n..        ...                               ...      ...      ...       ...\\n95 2025-07-20  Utility Bill Payment Electricity     0.00  2989.23   3926.14\\n96 2025-07-23         Salary Credit XYZ Pvt Ltd     0.00  2988.46   6914.60\\n97 2025-07-24      Electricity Bill NEFT Online  2917.52     0.00   3997.08\\n98 2025-07-25         Salary Credit XYZ Pvt Ltd   566.32     0.00   3430.76\\n99 2025-07-27         ATM Cash Withdrawal India     0.00  2156.01   5586.77\\n\\n[100 rows x 5 columns])\n +    where equals = Empty DataFrame\\nColumns: [Date, Description, Debit, Credit, Balance]\\nIndex: [].equals
+=========================== short test summary info ===========================
+FAILED tests/test_icici_parser.py::TestICICIParser::test_parse_dataframe_structure
+FAILED tests/test_icici_parser.py::TestICICIParser::test_parse_matches_expected_data
+========================= 2 failed, 5 passed in 1.99s =========================
+
+2025-09-17 00:19:54,975 - WARNING - [FAILED] Attempt 3 failed. Test output:
+============================= test session starts =============================
+platform win32 -- Python 3.12.3, pytest-8.4.2, pluggy-1.6.0 -- C:\Users\Vaishnav A\AppData\Local\Programs\Python\Python312\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Vaishnav A\ai-agent-challenge
+plugins: anyio-4.8.0, langsmith-0.3.19
+collecting ... collected 7 items
+
+tests/test_icici_parser.py::TestICICIParser::test_parse_file_exists PASSED [ 14%]
+tests/test_icici_parser.py::TestICICIParser::test_parse_returns_dataframe PASSED [ 28%]
+tests/test_icici_parser.py::TestICICIParser::test_parse_dataframe_structure FAILED [ 42%]
+tests/test_icici_parser.py::TestICICIParser::test_parse_data_types PASSED [ 57%]
+tests/test_icici_parser.py::TestICICIParser::test_parse_matches_expected_data FAILED [ 71%]
+tests/test_icici_parser.py::TestICICIParser::test_parse_handles_missing_file PASSED [ 85%]
+tests/test_icici_parser.py::TestICICIParser::test_parse_handles_invalid_pdf PASSED [100%]
+
+================================== FAILURES ===================================
+_______________ TestICICIParser.test_parse_dataframe_structure ________________
+tests\test_icici_parser.py:88: in test_parse_dataframe_structure
+    assert len(result) > 0, "DataFrame should not be empty"
+E   AssertionError: DataFrame should not be empty
+E   assert 0 > 0
+E    +  where 0 = len(Empty DataFrame\nColumns: [Date, Description, Debit, Credit, Balance]\nIndex: [])
+______________ TestICICIParser.test_parse_matches_expected_data _______________
+tests\test_icici_parser.py:143: in test_parse_matches_expected_data
+    assert result_sorted.equals(expected_sorted), \
+E   AssertionError: DataFrames are not equal according to pandas DataFrame.equals()
+E   assert False
+E    +  where False = equals(         Date                       Description    Debit   Credit   Balance\n0  2024-08-01         Salary Credit XYZ Pvt Ltd  1935.30     0.00   6864.58\n1  2024-08-02         Salary Credit XYZ Pvt Ltd     0.00  1652.61   8517.19\n2  2024-08-03           IMPS UPI Payment Amazon  3886.08     0.00   4631.11\n3  2024-08-03           Mobile Recharge Via UPI     0.00  1648.72   6279.83\n4  2024-08-14          Fuel Purchase Debit Card     0.00  3878.57  10158.40\n..        ...                               ...      ...      ...       ...\n95 2025-07-20  Utility Bill Payment Electricity     0.00  2989.23   3926.14\n96 2025-07-23         Salary Credit XYZ Pvt Ltd     0.00  2988.46   6914.60\n97 2025-07-24      Electricity Bill NEFT Online  2917.52     0.00   3997.08\n98 2025-07-25         Salary Credit XYZ Pvt Ltd   566.32     0.00   3430.76\n99 2025-07-27         ATM Cash Withdrawal India     0.00  2156.01   5586.77\n\n[100 rows x 5 columns])
+E    +    where equals = Empty DataFrame\nColumns: [Date, Description, Debit, Credit, Balance]\nIndex: [].equals
+---------------------------- Captured stdout call -----------------------------
+\u274c DataFrame.equals() returned False\nResult DataFrame shape: (0, 5)\nExpected DataFrame shape: (100, 5)\nResult dtypes:\nDate           datetime64[ns]\nDescription            object\nDebit                   int64\nCredit                  int64\nBalance                 int64\ndtype: object\nExpected dtypes:\nDate           datetime64[ns]\nDescription            object\nDebit                 float64\nCredit                float64\nBalance               float64\ndtype: object\n\nFirst 5 rows of result:\nEmpty DataFrame\nColumns: [Date, Description, Debit, Credit, Balance]\nIndex: []\n\nFirst 5 rows of expected:\n        Date                Description    Debit   Credit   Balance\n0 2024-08-01  Salary Credit XYZ Pvt Ltd  1935.30     0.00   6864.58\n1 2024-08-02  Salary Credit XYZ Pvt Ltd     0.00  1652.61   8517.19\n2 2024-08-03    IMPS UPI Payment Amazon  3886.08     0.00   4631.11\n3 2024-08-03    Mobile Recharge Via UPI     0.00  1648.72   6279.83\n4 2024-08-14   Fuel Purchase Debit Card     0.00  3878.57  10158.40\n\u274c Error during comparison: DataFrames are not equal according to pandas DataFrame.equals()\nassert False\n +  where False = equals(         Date                       Description    Debit   Credit   Balance\\n0  2024-08-01         Salary Credit XYZ Pvt Ltd  1935.30     0.00   6864.58\\n1  2024-08-02         Salary Credit XYZ Pvt Ltd     0.00  1652.61   8517.19\\n2  2024-08-03           IMPS UPI Payment Amazon  3886.08     0.00   4631.11\\n3  2024-08-03           Mobile Recharge Via UPI     0.00  1648.72   6279.83\\n4  2024-08-14          Fuel Purchase Debit Card     0.00  3878.57  10158.40\\n..        ...                               ...      ...      ...       ...\\n95 2025-07-20  Utility Bill Payment Electricity     0.00  2989.23   3926.14\\n96 2025-07-23         Salary Credit XYZ Pvt Ltd     0.00  2988.46   6914.60\\n97 2025-07-24      Electricity Bill NEFT Online  2917.52     0.00   3997.08\\n98 2025-07-25         Salary Credit XYZ Pvt Ltd   566.32     0.00   3430.76\\n99 2025-07-27         ATM Cash Withdrawal India     0.00  2156.01   5586.77\\n\\n[100 rows x 5 columns])\n +    where equals = Empty DataFrame\\nColumns: [Date, Description, Debit, Credit, Balance]\\nIndex: [].equals
+=========================== short test summary info ===========================
+FAILED tests/test_icici_parser.py::TestICICIParser::test_parse_dataframe_structure
+FAILED tests/test_icici_parser.py::TestICICIParser::test_parse_matches_expected_data
+========================= 2 failed, 5 passed in 1.99s =========================
+
+2025-09-17 00:19:54,976 - ERROR - [FAILED] Failed after 3 attempts
+2025-09-17 00:19:54,977 - ERROR - [FAILED] Agent failed to complete the task
+2025-09-17 00:23:53,271 - INFO - Initialized Gemini client
+2025-09-17 00:23:53,271 - INFO - [START] Starting agent loop for ICICI bank
+2025-09-17 00:23:53,646 - INFO - [ATTEMPT] Attempt 1/3
+2025-09-17 00:23:53,646 - INFO - [GENERATE] Generating parser code...
+2025-09-17 00:23:55,531 - ERROR - Error generating parser code: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. [violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-1.5-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 50
+}
+, links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, retry_delay {
+  seconds: 4
+}
+]
+2025-09-17 00:23:55,532 - ERROR - [ERROR] Error in attempt 1: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. [violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-1.5-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 50
+}
+, links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, retry_delay {
+  seconds: 4
+}
+]
+2025-09-17 00:23:55,532 - INFO - [RETRY] Retrying...
+2025-09-17 00:23:55,533 - INFO - [ATTEMPT] Attempt 2/3
+2025-09-17 00:23:55,533 - INFO - [GENERATE] Generating parser code...
+2025-09-17 00:23:55,949 - ERROR - Error generating parser code: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. [violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-1.5-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 50
+}
+, links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, retry_delay {
+  seconds: 4
+}
+]
+2025-09-17 00:23:55,949 - ERROR - [ERROR] Error in attempt 2: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. [violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-1.5-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 50
+}
+, links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, retry_delay {
+  seconds: 4
+}
+]
+2025-09-17 00:23:55,950 - INFO - [RETRY] Retrying...
+2025-09-17 00:23:55,951 - INFO - [ATTEMPT] Attempt 3/3
+2025-09-17 00:23:55,951 - INFO - [GENERATE] Generating parser code...
+2025-09-17 00:23:57,195 - ERROR - Error generating parser code: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. [violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-1.5-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 50
+}
+, links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, retry_delay {
+  seconds: 3
+}
+]
+2025-09-17 00:23:57,196 - ERROR - [ERROR] Error in attempt 3: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. [violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-1.5-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 50
+}
+, links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, retry_delay {
+  seconds: 3
+}
+]
+2025-09-17 00:23:57,196 - ERROR - [FAILED] Failed after 3 attempts due to errors
+2025-09-17 00:23:57,197 - ERROR - [FAILED] Agent failed to complete the task
+2025-09-17 09:53:01,639 - INFO - Initialized Gemini client
+2025-09-17 09:53:01,640 - INFO - [START] Starting agent loop for ICICI bank
+2025-09-17 09:53:01,641 - INFO - [CHECK] Existing parser found, testing...
+2025-09-17 09:53:04,236 - INFO - [PASS] All tests passed!
+2025-09-17 09:53:04,236 - INFO - [SUCCESS] Existing parser is working correctly!
+2025-09-17 09:53:04,236 - INFO - [COMPLETE] Agent completed successfully!
+2025-09-17 09:53:13,306 - INFO - Initialized Gemini client
+2025-09-17 09:53:13,307 - INFO - [START] Starting agent loop for ICICI bank
+2025-09-17 09:53:13,307 - INFO - [CHECK] Existing parser found, testing...
+2025-09-17 09:53:15,650 - INFO - [PASS] All tests passed!
+2025-09-17 09:53:15,651 - INFO - [SUCCESS] Existing parser is working correctly!
+2025-09-17 09:53:15,651 - INFO - [COMPLETE] Agent completed successfully!
+2025-09-17 09:53:39,023 - INFO - Initialized Gemini client
+2025-09-17 09:53:39,023 - INFO - [START] Starting agent loop for ICICI bank
+2025-09-17 09:53:39,024 - INFO - [CHECK] Existing parser found, testing...
+2025-09-17 09:53:41,543 - INFO - [PASS] All tests passed!
+2025-09-17 09:53:41,544 - INFO - [SUCCESS] Existing parser is working correctly!
+2025-09-17 09:53:41,544 - INFO - [COMPLETE] Agent completed successfully!
+2025-09-17 09:55:49,285 - INFO - Initialized Gemini client
+2025-09-17 09:55:49,285 - INFO - [START] Starting agent loop for ICICI bank
+2025-09-17 09:55:49,286 - INFO - [CHECK] Existing parser found, testing...
+2025-09-17 09:55:51,783 - INFO - [PASS] All tests passed!
+2025-09-17 09:55:51,783 - INFO - [SUCCESS] Existing parser is working correctly!
+2025-09-17 09:55:51,783 - INFO - [COMPLETE] Agent completed successfully!
+2025-09-17 09:55:59,946 - INFO - Initialized Gemini client
+2025-09-17 09:55:59,947 - INFO - [START] Starting agent loop for ICICI bank
+2025-09-17 09:55:59,947 - INFO - [CHECK] Existing parser found, testing...
+2025-09-17 09:56:02,364 - INFO - [PASS] All tests passed!
+2025-09-17 09:56:02,364 - INFO - [SUCCESS] Existing parser is working correctly!
+2025-09-17 09:56:02,364 - INFO - [COMPLETE] Agent completed successfully!
+2025-09-17 09:56:23,909 - INFO - Initialized Gemini client
+2025-09-17 09:56:23,909 - INFO - [START] Starting agent loop for ICICI bank
+2025-09-17 09:56:23,909 - INFO - [CHECK] Existing parser found, testing...
+2025-09-17 09:56:26,399 - INFO - [PASS] All tests passed!
+2025-09-17 09:56:26,400 - INFO - [SUCCESS] Existing parser is working correctly!
+2025-09-17 09:56:26,401 - INFO - [COMPLETE] Agent completed successfully!
+2025-09-17 09:58:18,846 - INFO - Initialized Gemini client
+2025-09-17 09:58:18,848 - INFO - [START] Starting agent loop for ICICI bank
+2025-09-17 09:58:18,848 - INFO - [CHECK] Existing parser found, testing...
+2025-09-17 09:58:20,902 - INFO - [PASS] All tests passed!
+2025-09-17 09:58:20,902 - INFO - [SUCCESS] Existing parser is working correctly!
+2025-09-17 09:58:20,902 - INFO - [COMPLETE] Agent completed successfully!
+2025-09-17 09:59:09,832 - INFO - Initialized Gemini client
+2025-09-17 09:59:09,833 - INFO - [START] Starting agent loop for ICICI bank
+2025-09-17 09:59:09,833 - INFO - [CHECK] Existing parser found, testing...
+2025-09-17 09:59:12,267 - INFO - [PASS] All tests passed!
+2025-09-17 09:59:12,267 - INFO - [SUCCESS] Existing parser is working correctly!
+2025-09-17 09:59:12,268 - INFO - [COMPLETE] Agent completed successfully!
+2025-09-28 07:48:04,825 - INFO - Initialized Gemini client
+2025-09-28 07:48:04,826 - INFO - [START] Starting agent loop for ICICI bank
+2025-09-28 07:48:04,826 - INFO - [CHECK] Existing parser found, testing...
+2025-09-28 07:48:07,225 - INFO - [PASS] All tests passed!
+2025-09-28 07:48:07,225 - INFO - [SUCCESS] Existing parser is working correctly!
+2025-09-28 07:48:07,225 - INFO - [COMPLETE] Agent completed successfully!
+2025-09-28 07:50:38,298 - INFO - Initialized gemini client
+2025-09-28 07:50:38,298 - INFO - [START] Agent loop for ICICI
+2025-09-28 07:50:38,298 - INFO - [CHECK] Testing existing parser...
+2025-09-28 07:50:40,886 - INFO - [PASS] Tests passed!
+2025-09-28 07:50:40,886 - INFO - [SUCCESS] Existing parser works!
+2025-09-28 07:53:03,249 - INFO - Initialized Gemini client
+2025-09-28 07:53:03,251 - INFO - [START] Starting agent loop for ICICI bank
+2025-09-28 07:53:03,251 - INFO - [CHECK] Existing parser found, testing...
+2025-09-28 07:53:05,637 - INFO - [PASS] All tests passed!
+2025-09-28 07:53:05,637 - INFO - [SUCCESS] Existing parser is working correctly!
+2025-09-28 07:53:05,637 - INFO - [COMPLETE] Agent completed successfully!
+2025-09-28 07:53:45,215 - INFO - Initialized Gemini client
+2025-09-28 07:53:45,215 - INFO - [START] Starting agent loop for ICICI bank
+2025-09-28 07:53:45,215 - INFO - [CHECK] Existing parser found, testing...
+2025-09-28 07:53:47,768 - INFO - [PASS] All tests passed!
+2025-09-28 07:53:47,768 - INFO - [SUCCESS] Existing parser is working correctly!
+2025-09-28 07:53:47,768 - INFO - [COMPLETE] Agent completed successfully!
+2025-09-28 07:58:13,216 - INFO - Initialized Gemini client
+2025-09-28 07:58:13,216 - INFO - [START] Starting agent loop for ICICI bank
+2025-09-28 07:58:13,216 - INFO - [CHECK] Existing parser found, testing...
+2025-09-28 07:58:15,407 - INFO - [PASS] All tests passed!
+2025-09-28 07:58:15,407 - INFO - [SUCCESS] Existing parser is working correctly!
+2025-09-28 07:58:15,407 - INFO - [COMPLETE] Agent completed successfully!
+2025-09-28 08:04:52,691 - INFO - Initialized Gemini client
+2025-09-28 08:04:52,692 - INFO - [START] Starting agent loop for ICICI bank
+2025-09-28 08:04:52,692 - INFO - [CHECK] Existing parser found, testing...
+2025-09-28 08:04:54,978 - INFO - [PASS] All tests passed!
+2025-09-28 08:04:54,978 - INFO - [SUCCESS] Existing parser is working correctly!
+2025-09-28 08:04:54,978 - INFO - [COMPLETE] Agent completed successfully!
+2025-09-28 08:05:20,751 - INFO - Initialized Gemini client
+2025-09-28 08:05:20,753 - INFO - [START] Starting agent loop for HDFC bank
+2025-09-28 08:05:20,754 - ERROR - Sample CSV not found: data\hdfc\result.csv
+2025-09-28 08:05:20,754 - ERROR - [FAILED] Agent failed to complete the task
+2025-09-28 09:41:04,515 - INFO - Initialized Gemini client
+2025-09-28 09:41:04,516 - INFO - [START] Starting agent loop for ICICI bank
+2025-09-28 09:41:04,765 - INFO - [ATTEMPT] Attempt 1/3
+2025-09-28 09:41:04,766 - INFO - [GENERATE] Generating parser code...
+2025-09-28 09:43:53,340 - INFO - Initialized Gemini client
+2025-09-28 09:43:53,341 - INFO - [START] Starting agent loop for ICICI bank
+2025-09-28 09:43:53,753 - INFO - [ATTEMPT] Attempt 1/3
+2025-09-28 09:43:53,753 - INFO - [GENERATE] Generating parser code...
+2025-09-28 09:43:54,856 - INFO - Initialized Gemini client
+2025-09-28 09:43:54,857 - INFO - [START] Starting agent loop for ICICI bank
+2025-09-28 09:43:55,234 - INFO - [ATTEMPT] Attempt 1/3
+2025-09-28 09:43:55,234 - INFO - [GENERATE] Generating parser code...
+2025-09-28 09:43:55,280 - INFO - Initialized Gemini client
+2025-09-28 09:43:55,280 - INFO - [START] Starting agent loop for ICICI bank
+2025-09-28 09:43:55,616 - INFO - [ATTEMPT] Attempt 1/3
+2025-09-28 09:43:55,616 - INFO - [GENERATE] Generating parser code...
+2025-09-28 09:43:55,646 - INFO - Initialized Gemini client
+2025-09-28 09:43:55,646 - INFO - [START] Starting agent loop for ICICI bank
+2025-09-28 09:43:55,921 - INFO - Initialized Gemini client
+2025-09-28 09:43:55,921 - INFO - [START] Starting agent loop for ICICI bank
+2025-09-28 09:43:55,951 - INFO - [ATTEMPT] Attempt 1/3
+2025-09-28 09:43:55,951 - INFO - [GENERATE] Generating parser code...
+2025-09-28 09:43:56,193 - INFO - [ATTEMPT] Attempt 1/3
+2025-09-28 09:43:56,193 - INFO - [GENERATE] Generating parser code...
+2025-09-28 09:44:00,148 - ERROR - Error generating parser code: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-09-28 09:44:00,148 - ERROR - [ERROR] Error in attempt 1: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-09-28 09:44:00,148 - INFO - [RETRY] Retrying...
+2025-09-28 09:44:00,150 - INFO - [ATTEMPT] Attempt 2/3
+2025-09-28 09:44:00,150 - INFO - [GENERATE] Generating parser code...
+2025-09-28 09:44:04,256 - INFO - Initialized Gemini client
+2025-09-28 09:44:04,256 - INFO - [START] Starting agent loop for ICICI bank
+2025-09-28 09:44:04,760 - INFO - [ATTEMPT] Attempt 1/3
+2025-09-28 09:44:04,760 - INFO - [GENERATE] Generating parser code...
+2025-09-28 09:44:06,115 - INFO - Initialized Gemini client
+2025-09-28 09:44:06,116 - INFO - [START] Starting agent loop for ICICI bank
+2025-09-28 09:44:06,510 - INFO - [ATTEMPT] Attempt 1/3
+2025-09-28 09:44:06,510 - INFO - [GENERATE] Generating parser code...
+2025-09-28 09:44:06,689 - INFO - Initialized Gemini client
+2025-09-28 09:44:06,689 - INFO - [START] Starting agent loop for ICICI bank
+2025-09-28 09:44:07,060 - INFO - [ATTEMPT] Attempt 1/3
+2025-09-28 09:44:07,060 - INFO - [GENERATE] Generating parser code...
+2025-09-28 09:44:07,153 - INFO - Initialized Gemini client
+2025-09-28 09:44:07,154 - INFO - [START] Starting agent loop for ICICI bank
+2025-09-28 09:44:07,381 - INFO - Initialized Gemini client
+2025-09-28 09:44:07,382 - INFO - [START] Starting agent loop for ICICI bank
+2025-09-28 09:44:07,490 - INFO - Initialized Gemini client
+2025-09-28 09:44:07,491 - INFO - [START] Starting agent loop for ICICI bank
+2025-09-28 09:44:07,507 - INFO - [ATTEMPT] Attempt 1/3
+2025-09-28 09:44:07,507 - INFO - [GENERATE] Generating parser code...
+2025-09-28 09:44:07,706 - INFO - [ATTEMPT] Attempt 1/3
+2025-09-28 09:44:07,707 - INFO - [GENERATE] Generating parser code...
+2025-09-28 09:44:07,801 - INFO - [ATTEMPT] Attempt 1/3
+2025-09-28 09:44:07,801 - INFO - [GENERATE] Generating parser code...
+2025-09-28 09:44:08,112 - ERROR - Error generating parser code: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-09-28 09:44:08,113 - ERROR - [ERROR] Error in attempt 2: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-09-28 09:44:08,113 - INFO - [RETRY] Retrying...
+2025-09-28 09:44:08,114 - INFO - [ATTEMPT] Attempt 3/3
+2025-09-28 09:44:08,114 - INFO - [GENERATE] Generating parser code...
+2025-09-28 09:44:14,107 - INFO - Initialized Gemini client
+2025-09-28 09:44:14,108 - INFO - [START] Starting agent loop for ICICI bank
+2025-09-28 09:44:14,378 - INFO - [ATTEMPT] Attempt 1/3
+2025-09-28 09:44:14,378 - INFO - [GENERATE] Generating parser code...
+2025-09-28 09:44:21,080 - ERROR - Error generating parser code: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-09-28 09:44:21,081 - ERROR - [ERROR] Error in attempt 3: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-09-28 09:44:21,081 - ERROR - [FAILED] Failed after 3 attempts due to errors
+2025-09-28 09:44:21,081 - ERROR - [FAILED] Agent failed to complete the task
+2025-09-28 09:44:39,777 - INFO - Initialized Gemini client
+2025-09-28 09:44:39,777 - INFO - [START] Starting agent loop for ICICI bank
+2025-09-28 09:44:40,030 - INFO - [ATTEMPT] Attempt 1/3
+2025-09-28 09:44:40,030 - INFO - [GENERATE] Generating parser code...
+2025-09-28 10:21:33,384 - INFO - Initialized Gemini client
+2025-09-28 10:21:33,385 - INFO - [START] Starting agent loop for ICICI bank
+2025-09-28 10:21:33,387 - INFO - [CHECK] Existing parser found, testing...
+2025-09-28 10:21:35,508 - INFO - [PASS] All tests passed!
+2025-09-28 10:21:35,508 - INFO - [SUCCESS] Existing parser is working correctly!
+2025-09-28 10:21:35,508 - INFO - [COMPLETE] Agent completed successfully!
+2025-09-28 10:22:09,145 - INFO - Initialized Gemini client
+2025-09-28 10:22:09,145 - INFO - [START] Starting agent loop for ICICI bank
+2025-09-28 10:22:09,471 - INFO - [ATTEMPT] Attempt 1/3
+2025-09-28 10:22:09,472 - INFO - [GENERATE] Generating parser code...
+2025-09-28 10:22:10,648 - ERROR - Error generating parser code: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-09-28 10:22:10,648 - ERROR - [ERROR] Error in attempt 1: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-09-28 10:22:10,649 - INFO - [RETRY] Retrying...
+2025-09-28 10:22:10,649 - INFO - [ATTEMPT] Attempt 2/3
+2025-09-28 10:22:10,649 - INFO - [GENERATE] Generating parser code...
+2025-09-28 10:22:10,955 - ERROR - Error generating parser code: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-09-28 10:22:10,955 - ERROR - [ERROR] Error in attempt 2: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-09-28 10:22:10,955 - INFO - [RETRY] Retrying...
+2025-09-28 10:22:10,955 - INFO - [ATTEMPT] Attempt 3/3
+2025-09-28 10:22:10,956 - INFO - [GENERATE] Generating parser code...
+2025-09-28 10:22:12,493 - ERROR - Error generating parser code: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-09-28 10:22:12,494 - ERROR - [ERROR] Error in attempt 3: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-09-28 10:22:12,494 - ERROR - [FAILED] Failed after 3 attempts due to errors
+2025-09-28 10:22:12,495 - ERROR - [FAILED] Agent failed to complete the task
+2025-09-28 10:24:04,290 - INFO - Initialized Gemini client
+2025-09-28 10:24:04,290 - INFO - [START] Starting agent loop for ICICI bank
+2025-09-28 10:24:04,290 - INFO - [CHECK] Existing parser found, testing...
+2025-09-28 10:24:06,408 - INFO - [PASS] All tests passed!
+2025-09-28 10:24:06,408 - INFO - [SUCCESS] Existing parser is working correctly!
+2025-09-28 10:24:06,408 - INFO - [COMPLETE] Agent completed successfully!
+2025-09-28 10:35:53,060 - INFO - Initialized gemini client
+2025-09-28 10:35:53,060 - INFO - [START] Agent loop for ICICI
+2025-09-28 10:35:53,061 - INFO - [CHECK] Testing existing parser...
+2025-09-28 10:35:55,044 - INFO - [PASS] Tests passed!
+2025-09-28 10:35:55,044 - INFO - [SUCCESS] Existing parser works!
+2025-09-28 10:36:12,440 - INFO - Initialized gemini client
+2025-09-28 10:36:12,441 - INFO - [START] Agent loop for ICICI
+2025-09-28 10:36:12,441 - INFO - [CHECK] Testing existing parser...
+2025-09-28 10:36:14,413 - INFO - [PASS] Tests passed!
+2025-09-28 10:36:14,413 - INFO - [SUCCESS] Existing parser works!
+2025-09-28 10:43:46,544 - INFO - Initialized gemini client
+2025-09-28 10:43:46,545 - INFO - [START] Agent loop for ICICI
+2025-09-28 10:43:46,545 - INFO - [CHECK] Testing existing parser...
+2025-09-28 10:43:48,584 - INFO - [PASS] Tests passed!
+2025-09-28 10:43:48,584 - INFO - [SUCCESS] Existing parser works!
+2025-09-28 10:44:06,876 - INFO - Initialized gemini client
+2025-09-28 10:44:06,877 - INFO - [START] Agent loop for ICICI
+2025-09-28 10:44:06,877 - INFO - [CHECK] Testing existing parser...
+2025-09-28 10:44:08,896 - INFO - [PASS] Tests passed!
+2025-09-28 10:44:08,896 - INFO - [SUCCESS] Existing parser works!
+2025-09-28 10:44:11,432 - INFO - Initialized gemini client
+2025-09-28 10:44:11,433 - INFO - [START] Agent loop for ICICI
+2025-09-28 10:44:11,433 - INFO - [CHECK] Testing existing parser...
+2025-09-28 10:44:13,523 - INFO - [PASS] Tests passed!
+2025-09-28 10:44:13,523 - INFO - [SUCCESS] Existing parser works!
+2025-09-28 10:44:32,311 - INFO - Initialized gemini client
+2025-09-28 10:44:32,311 - INFO - [START] Agent loop for ICICI
+2025-09-28 10:44:32,312 - INFO - [CHECK] Testing existing parser...
+2025-09-28 10:44:34,964 - INFO - [PASS] Tests passed!
+2025-09-28 10:44:34,964 - INFO - [SUCCESS] Existing parser works!
+2025-09-28 10:44:36,061 - INFO - Initialized gemini client
+2025-09-28 10:44:36,061 - INFO - [START] Agent loop for ICICI
+2025-09-28 10:44:36,062 - INFO - [CHECK] Testing existing parser...
+2025-09-28 10:44:36,099 - INFO - Initialized gemini client
+2025-09-28 10:44:36,100 - INFO - [START] Agent loop for ICICI
+2025-09-28 10:44:36,100 - INFO - [CHECK] Testing existing parser...
+2025-09-28 10:44:38,509 - INFO - [PASS] Tests passed!
+2025-09-28 10:44:38,510 - INFO - [SUCCESS] Existing parser works!
+2025-09-28 10:44:38,510 - INFO - [SUCCESS] Existing parser works!
+2025-09-28 10:45:02,540 - INFO - Initialized gemini client
+2025-09-28 10:45:02,540 - INFO - [START] Agent loop for ICICI
+2025-09-28 10:45:02,541 - INFO - [CHECK] Testing existing parser...
+2025-09-28 10:45:04,597 - INFO - [PASS] Tests passed!
+2025-09-28 10:45:04,598 - INFO - [SUCCESS] Existing parser works!
+2025-09-28 10:47:11,156 - INFO - Initialized gemini client
+2025-09-28 10:47:11,156 - INFO - [START] Agent loop for ICICI
+2025-09-28 10:47:11,157 - INFO - [CHECK] Testing existing parser...
+2025-09-28 10:47:13,113 - INFO - [PASS] Tests passed!
+2025-09-28 10:47:13,114 - INFO - [SUCCESS] Existing parser works!
+2025-09-28 10:52:05,627 - INFO - Initialized gemini client
+2025-09-28 10:52:05,628 - INFO - [START] Agent loop for ICICI
+2025-09-28 10:52:05,628 - INFO - [CHECK] Testing existing parser...
+2025-09-28 10:52:07,855 - INFO - [PASS] Tests passed!
+2025-09-28 10:52:07,856 - INFO - [SUCCESS] Existing parser works!
+2025-09-28 11:06:45,089 - INFO - Initialized gemini client
+2025-09-28 11:06:45,090 - INFO - [START] Agent loop for ICICI
+2025-09-28 11:06:45,090 - INFO - [CHECK] Testing existing parser...
+2025-09-28 11:06:47,451 - INFO - [PASS] Tests passed!
+2025-09-28 11:06:47,451 - INFO - [SUCCESS] Existing parser works!
