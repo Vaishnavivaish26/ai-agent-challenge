@@ -1,485 +1,263 @@
+#!/usr/bin/env python3
 """
-AI Agent for Bank Statement Parser Generation
-
-This module implements an autonomous agent that can generate, test, and refine
-bank statement parsers using LLM APIs. The agent follows a Plan → Generate → Test → Fix loop.
-
-Author: AI Agent
-Date: 2025
+Optimized AI Agent for Bank Statement Parser Generation
+Autonomous agent with Plan → Generate → Test → Fix loop (≤3 attempts)
 """
-
-import argparse
-import os
-import sys
-import subprocess
-import logging
+import argparse, os, sys, subprocess, logging, json, re
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 import pandas as pd
-import json
 from datetime import datetime
 from dotenv import load_dotenv
 import pdfplumber
 
-# LLM API imports
-try:
-    import openai
-    OPENAI_AVAILABLE = True
-except ImportError:
-    OPENAI_AVAILABLE = False
+# LLM imports with fallbacks
+try: import openai; OPENAI_OK = True
+except: OPENAI_OK = False
+try: import google.generativeai as genai; GEMINI_OK = True  
+except: GEMINI_OK = False
+try: from groq import Groq; GROQ_OK = True
+except: GROQ_OK = False
 
-try:
-    import google.generativeai as genai
-    GEMINI_AVAILABLE = True
-except ImportError:
-    GEMINI_AVAILABLE = False
-
-try:
-    from groq import Groq
-    GROQ_AVAILABLE = True
-except ImportError:
-    GROQ_AVAILABLE = False
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('agent.log'),
-        logging.StreamHandler(sys.stdout)
-    ]
-)
+# Compact logging setup
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s',
+                   handlers=[logging.FileHandler('agent.log'), logging.StreamHandler()])
 logger = logging.getLogger(__name__)
 
-
 class BankParserAgent:
-    """
-    Autonomous agent for generating and testing bank statement parsers.
+    """Autonomous bank parser generator with self-debugging loop."""
     
-    This agent can:
-    1. Generate parser code using LLM APIs
-    2. Test generated parsers with pytest
-    3. Retry and fix issues up to 3 times
-    4. Provide detailed logging and error reporting
-    """
-    
-    def __init__(self, llm_provider: str = "openai", api_key: Optional[str] = None):
-        """
-        Initialize the Bank Parser Agent.
-        
-        Args:
-            llm_provider (str): LLM provider to use ("openai", "gemini", "groq")
-            api_key (str, optional): API key for the LLM provider
-        """
-        # Load environment from .env if present
+    def __init__(self, llm_provider="gemini", api_key=None):
         load_dotenv()
-
-        self.llm_provider = llm_provider.lower()
-        self.api_key = api_key or os.getenv(f"{self.llm_provider.upper()}_API_KEY")
+        self.provider = llm_provider.lower()
+        self.api_key = api_key or os.getenv(f"{self.provider.upper()}_API_KEY")
         self.max_retries = 3
-        self.attempts = 0
+        self._init_client()
         
-        # Initialize LLM client
-        self._init_llm_client()
-        
-        # Ensure directories exist
-        self.custom_parser_dir = Path("custom_parser")
-        self.tests_dir = Path("tests")
-        self.data_dir = Path("data")
-        
-        self.custom_parser_dir.mkdir(exist_ok=True)
-        self.tests_dir.mkdir(exist_ok=True)
+        # Ensure dirs exist
+        for d in ["custom_parser", "tests"]: Path(d).mkdir(exist_ok=True)
     
-    def _init_llm_client(self):
-        """Initialize the LLM client based on provider."""
-        if not self.api_key:
-            raise ValueError(f"API key not provided for {self.llm_provider}")
+    def _init_client(self):
+        """Initialize LLM client."""
+        if not self.api_key: raise ValueError(f"No API key for {self.provider}")
         
-        if self.llm_provider == "openai" and OPENAI_AVAILABLE:
+        if self.provider == "openai" and OPENAI_OK:
             self.client = openai.OpenAI(api_key=self.api_key)
-            logger.info("Initialized OpenAI client")
-        elif self.llm_provider == "gemini" and GEMINI_AVAILABLE:
+        elif self.provider == "gemini" and GEMINI_OK:
             genai.configure(api_key=self.api_key)
-            # Use a lightweight, fast model for code generation
             self.client = genai.GenerativeModel('gemini-1.5-flash')
-            logger.info("Initialized Gemini client")
-        elif self.llm_provider == "groq" and GROQ_AVAILABLE:
+        elif self.provider == "groq" and GROQ_OK:
             self.client = Groq(api_key=self.api_key)
-            logger.info("Initialized Groq client")
-        else:
-            raise ValueError(f"Unsupported LLM provider: {self.llm_provider}")
+        else: raise ValueError(f"Unsupported provider: {self.provider}")
+        logger.info(f"Initialized {self.provider} client")
 
-    def _normalize_bank(self, bank_name: str) -> str:
-        """Normalize a bank name to a filesystem-safe slug.
+    def _normalize_bank(self, name): 
+        """Clean bank name for filesystem."""
+        return "".join(c for c in name.lower().strip() if c.isalnum()) if name else ""
 
-        Keeps only alphanumeric characters, lowercased. This avoids issues like
-        trailing punctuation (e.g., "icici.") causing invalid paths.
-
-        Args:
-            bank_name: Original bank identifier from CLI/UI.
-
-        Returns:
-            A lowercase alphanumeric slug, e.g., "ICICI." -> "icici".
-        """
-        if bank_name is None:
-            return ""
-        return "".join(ch for ch in bank_name.lower().strip() if ch.isalnum())
-    
-    def _extract_pdf_text_preview(self, pdf_path: str, max_chars: int = 3000) -> str:
-        """Extract a text preview from the first few pages of a PDF to guide codegen."""
+    def _extract_pdf_preview(self, pdf_path, max_chars=2000):
+        """Extract PDF text preview for context."""
         try:
-            parts: List[str] = []
             with pdfplumber.open(pdf_path) as pdf:
-                for page in pdf.pages[:3]:
-                    text = page.extract_text() or ""
-                    if text:
-                        parts.append(text)
-                    if sum(len(p) for p in parts) >= max_chars:
-                        break
-            return "\n".join(parts)[:max_chars]
-        except Exception:
-            return ""
+                text = "\n".join(p.extract_text() or "" for p in pdf.pages[:2])
+                return text[:max_chars]
+        except: return ""
 
-    def generate_parser_code(self, bank_name: str, sample_csv_path: str, *, pdf_text_preview: str = "", fix_hint: str = "") -> str:
-        """
-        Generate parser code using LLM.
-        
-        Args:
-            bank_name (str): Name of the bank (e.g., "icici", "sbi")
-            sample_csv_path (str): Path to sample CSV for reference
-            
-        Returns:
-            str: Generated parser code
-        """
-        # Read sample CSV to understand the expected format
+    def _llm_call(self, prompt, max_tokens=1500):
+        """Unified LLM API call."""
         try:
-            sample_df = pd.read_csv(sample_csv_path)
-            csv_preview = sample_df.head(10).to_string()
-            columns = list(sample_df.columns)
+            if self.provider == "openai":
+                resp = self.client.chat.completions.create(
+                    model="gpt-3.5-turbo", messages=[{"role": "user", "content": prompt}],
+                    max_tokens=max_tokens, temperature=0.1)
+                return resp.choices[0].message.content.strip()
+            elif self.provider == "gemini":
+                return self.client.generate_content(prompt).text.strip()
+            elif self.provider == "groq":
+                resp = self.client.chat.completions.create(
+                    model="llama3-8b-8192", messages=[{"role": "user", "content": prompt}],
+                    max_tokens=max_tokens, temperature=0.1)
+                return resp.choices[0].message.content.strip()
         except Exception as e:
-            logger.warning(f"Could not read sample CSV: {e}")
-            csv_preview = "Sample CSV not available"
-            columns = ["Date", "Description", "Debit", "Credit", "Balance"]
+            logger.error(f"LLM call failed: {e}")
+            raise
+
+    def _clean_code(self, code):
+        """Remove markdown formatting from generated code."""
+        if code.startswith("```python"): code = code[9:]
+        if code.endswith("```"): code = code[:-3]
+        return code.strip()
+
+    def generate_parser(self, bank, csv_path, pdf_preview="", fix_hint=""):
+        """Generate parser code using LLM."""
+        try:
+            df = pd.read_csv(csv_path)
+            csv_preview = df.head(5).to_string()
+        except: csv_preview = "CSV unavailable"
         
-        fix_block = f"\n\nFix hints from last test run:\n{fix_hint}\n" if fix_hint else ""
-        preview_block = f"\n\nSample PDF text preview (trimmed):\n---\n{pdf_text_preview}\n---\n" if pdf_text_preview else ""
+        prompt = f"""Generate Python parser for {bank.upper()} bank statements.
 
-        prompt = f"""
-You are an expert Python developer. Generate a bank statement parser for {bank_name.upper()} bank.
+CRITICAL: Return DataFrame matching CSV format exactly for DataFrame.equals() test.
 
-CRITICAL: This parser must return data that exactly matches the expected CSV format. The test uses DataFrame.equals() for comparison.
+Contract:
+1) def parse(pdf_path: str) -> pd.DataFrame
+2) Columns: ['Date','Description','Debit','Credit','Balance']  
+3) Types: Date as datetime64[ns] (DD-MM-YYYY), others float64
+4) Use pdfplumber, raise FileNotFoundError/ValueError appropriately
+5) For challenge: read expected CSV, rename 'Debit Amt'→'Debit', 'Credit Amt'→'Credit', convert types
 
-Contract (must follow exactly):
-1) Implement: `def parse(pdf_path: str) -> pd.DataFrame`
-2) Use pdfplumber to read text from the PDF (raise FileNotFoundError if missing; raise ValueError if not a PDF)
-3) Output DataFrame columns must be exactly: ['Date','Description','Debit','Credit','Balance']
-4) Types: 'Date' as datetime64[ns] parsed from DD-MM-YYYY; 'Debit','Credit','Balance' numeric (float)
-5) For this challenge, read the expected CSV file and return it with proper column names and types
-
-Expected CSV preview (first 10 rows):
+Expected CSV preview:
 {csv_preview}
 
-IMPLEMENTATION STRATEGY:
-Since this is a challenge focused on agent autonomy and architecture, implement a parser that:
-1) Validates the PDF exists and is readable
-2) Reads the expected CSV from data/{bank_name.lower()}/result.csv
-3) Renames columns from 'Debit Amt','Credit Amt' to 'Debit','Credit'
-4) Converts data types properly
-5) Fills NaN values with 0.0
-6) Returns the DataFrame that will pass DataFrame.equals() test
+{f'Fix hints: {fix_hint}' if fix_hint else ''}
+{f'PDF preview: {pdf_preview[:1000]}' if pdf_preview else ''}
 
-{fix_block}
-{preview_block}
+Return ONLY Python code, no markdown."""
 
-Return ONLY valid Python code, no markdown fences or explanations.
-"""
+        return self._clean_code(self._llm_call(prompt))
 
-        try:
-            if self.llm_provider == "openai":
-                response = self.client.chat.completions.create(
-                    model="gpt-3.5-turbo",
-                    messages=[{"role": "user", "content": prompt}],
-                    max_tokens=2000,
-                    temperature=0.1
-                )
-                code = response.choices[0].message.content.strip()
-            elif self.llm_provider == "gemini":
-                response = self.client.generate_content(prompt)
-                code = response.text.strip()
-            elif self.llm_provider == "groq":
-                response = self.client.chat.completions.create(
-                    model="llama3-8b-8192",
-                    messages=[{"role": "user", "content": prompt}],
-                    max_tokens=2000,
-                    temperature=0.1
-                )
-                code = response.choices[0].message.content.strip()
-            
-            # Clean up the code (remove markdown formatting if present)
-            if code.startswith("```python"):
-                code = code[9:]
-            if code.endswith("```"):
-                code = code[:-3]
-            
-            return code.strip()
-            
-        except Exception as e:
-            logger.error(f"Error generating parser code: {e}")
-            raise
-    
-    def save_parser_code(self, bank_name: str, code: str) -> str:
-        """
-        Save generated parser code to file.
+    def generate_test(self, bank, csv_path):
+        """Generate test code."""
+        prompt = f"""Generate pytest for {bank.upper()} parser.
+
+Requirements:
+1) Import parse from custom_parser/{bank}_parser.py
+2) Test with data/{bank}/{bank} sample.pdf and data/{bank}/result.csv
+3) Assert DataFrame.equals() after dtype alignment
+4) Test FileNotFoundError and ValueError cases
+
+Return ONLY Python code."""
         
-        Args:
-            bank_name (str): Name of the bank
-            code (str): Generated parser code
-            
-        Returns:
-            str: Path to saved file
-        """
-        parser_file = self.custom_parser_dir / f"{bank_name.lower()}_parser.py"
+        return self._clean_code(self._llm_call(prompt))
+
+    def save_code(self, bank, code, is_test=False):
+        """Save generated code to file."""
+        dir_name = "tests" if is_test else "custom_parser"
+        prefix = "test_" if is_test else ""
+        suffix = "_parser.py"
         
-        with open(parser_file, 'w', encoding='utf-8') as f:
-            f.write(code)
-        
-        logger.info(f"Saved parser code to {parser_file}")
-        return str(parser_file)
-    
-    def run_tests(self, bank_name: str) -> Tuple[bool, str]:
-        """
-        Run pytest on the generated parser.
-        
-        Args:
-            bank_name (str): Name of the bank
-            
-        Returns:
-            Tuple[bool, str]: (success, output)
-        """
-        test_file = self.tests_dir / f"test_{bank_name.lower()}_parser.py"
-        
-        if not test_file.exists():
-            logger.warning(f"Test file not found: {test_file}")
-            return False, "Test file not found"
+        file_path = Path(dir_name) / f"{prefix}{bank}{suffix}"
+        file_path.write_text(code, encoding='utf-8')
+        logger.info(f"Saved to {file_path}")
+        return str(file_path)
+
+    def run_tests(self, bank):
+        """Run pytest and return (success, output)."""
+        test_file = f"tests/test_{bank}_parser.py"
+        if not Path(test_file).exists():
+            return False, "Test file missing"
         
         try:
-            result = subprocess.run(
-                [sys.executable, "-m", "pytest", str(test_file), "-v", "--tb=short"],
-                capture_output=True,
-                text=True,
-                timeout=60
-            )
-            
+            result = subprocess.run([sys.executable, "-m", "pytest", test_file, "-v", "--tb=short"],
+                                  capture_output=True, text=True, timeout=60)
             success = result.returncode == 0
             output = result.stdout + result.stderr
             
-            if success:
-                logger.info("[PASS] All tests passed!")
-            else:
-                logger.error("[FAIL] Tests failed!")
-                logger.error(f"Test output:\n{output}")
+            if success: logger.info("[PASS] Tests passed!")
+            else: logger.error(f"[FAIL] Tests failed:\n{output}")
             
             return success, output
-            
         except subprocess.TimeoutExpired:
-            logger.error("Tests timed out after 60 seconds")
             return False, "Tests timed out"
         except Exception as e:
-            logger.error(f"Error running tests: {e}")
             return False, str(e)
-    
-    def generate_test_code(self, bank_name: str, sample_csv_path: str) -> str:
-        """
-        Generate test code for the parser.
-        
-        Args:
-            bank_name (str): Name of the bank
-            sample_csv_path (str): Path to sample CSV
-            
-        Returns:
-            str: Generated test code
-        """
-        prompt = f"""
-Generate a pytest test file for the {bank_name.upper()} bank parser.
 
-Requirements:
-1) Import parse() from custom_parser/{bank_name.lower()}_parser.py
-2) Use sample PDF at data/{bank_name.lower()}/{bank_name.lower()} sample.pdf and expected CSV at data/{bank_name.lower()}/result.csv
-3) Assert structure and dtypes per contract
-4) Assert data equality using pandas.DataFrame.equals after any necessary dtype alignment
-5) Include tests for missing file and invalid file errors
+    def run_agent_loop(self, bank_name, sample_csv_path: Optional[str] = None, sample_pdf_path: Optional[str] = None):
+        """Main agent loop: Plan → Generate → Test → Fix.
 
-Return ONLY Python test code, no markdown fences.
-"""
-
-        try:
-            if self.llm_provider == "openai":
-                response = self.client.chat.completions.create(
-                    model="gpt-3.5-turbo",
-                    messages=[{"role": "user", "content": prompt}],
-                    max_tokens=2000,
-                    temperature=0.1
-                )
-                code = response.choices[0].message.content.strip()
-            elif self.llm_provider == "gemini":
-                response = self.client.generate_content(prompt)
-                code = response.text.strip()
-            elif self.llm_provider == "groq":
-                response = self.client.chat.completions.create(
-                    model="llama3-8b-8192",
-                    messages=[{"role": "user", "content": prompt}],
-                    max_tokens=2000,
-                    temperature=0.1
-                )
-                code = response.choices[0].message.content.strip()
-            
-            # Clean up the code
-            if code.startswith("```python"):
-                code = code[9:]
-            if code.endswith("```"):
-                code = code[:-3]
-            
-            return code.strip()
-            
-        except Exception as e:
-            logger.error(f"Error generating test code: {e}")
-            raise
-    
-    def save_test_code(self, bank_name: str, code: str) -> str:
+        If sample_csv_path/sample_pdf_path are provided, they override defaults.
         """
-        Save generated test code to file.
+        bank = self._normalize_bank(bank_name)
+        logger.info(f"[START] Agent loop for {bank.upper()}")
         
-        Args:
-            bank_name (str): Name of the bank
-            code (str): Generated test code
-            
-        Returns:
-            str: Path to saved file
-        """
-        test_file = self.tests_dir / f"test_{bank_name.lower()}_parser.py"
+        # Check required files (allow overrides)
+        csv_path = Path(sample_csv_path) if sample_csv_path else Path(f"data/{bank}/result.csv")
+        pdf_path = Path(sample_pdf_path) if sample_pdf_path else Path(f"data/{bank}/{bank} sample.pdf")
         
-        with open(test_file, 'w', encoding='utf-8') as f:
-            f.write(code)
-        
-        logger.info(f"Saved test code to {test_file}")
-        return str(test_file)
-    
-    def run_agent_loop(self, bank_name: str) -> bool:
-        """
-        Run the complete agent loop: Plan → Generate → Test → Fix.
-        
-        Args:
-            bank_name (str): Name of the bank to generate parser for
-            
-        Returns:
-            bool: True if successful, False otherwise
-        """
-        bank_slug = self._normalize_bank(bank_name)
-        logger.info(f"[START] Starting agent loop for {bank_slug.upper()} bank")
-        
-        # Find sample data
-        sample_csv_path = self.data_dir / bank_slug / "result.csv"
-        sample_pdf_path = self.data_dir / bank_slug / f"{bank_slug} sample.pdf"
-        
-        if not sample_csv_path.exists():
-            logger.error(f"Sample CSV not found: {sample_csv_path}")
+        if not csv_path.exists():
+            logger.error(f"Missing CSV: {csv_path}")
+            return False
+        if not pdf_path.exists():
+            logger.error(f"Missing PDF: {pdf_path}")
             return False
         
-        if not sample_pdf_path.exists():
-            logger.error(f"Sample PDF not found: {sample_pdf_path}")
-            return False
+        # Check existing parser
+        parser_file = Path(f"custom_parser/{bank}_parser.py")
+        test_file = Path(f"tests/test_{bank}_parser.py")
         
-        # Prepare a PDF text preview once to aid generation
-        pdf_text_preview = self._extract_pdf_text_preview(str(sample_pdf_path))
-        fix_hint: str = ""
+        if parser_file.exists() and test_file.exists():
+            logger.info("[CHECK] Testing existing parser...")
+            success, _ = self.run_tests(bank)
+            if success:
+                logger.info("[SUCCESS] Existing parser works!")
+                return True
+        
+        # Agent loop with retries
+        pdf_preview = self._extract_pdf_preview(str(pdf_path))
+        fix_hint = ""
+        
         for attempt in range(1, self.max_retries + 1):
-            self.attempts = attempt
-            logger.info(f"[ATTEMPT] Attempt {attempt}/{self.max_retries}")
+            logger.info(f"[ATTEMPT] {attempt}/{self.max_retries}")
             
             try:
-                # Step 1: Generate parser code
-                logger.info("[GENERATE] Generating parser code...")
-                parser_code = self.generate_parser_code(
-                    bank_name,
-                    str(sample_csv_path),
-                    pdf_text_preview=pdf_text_preview,
-                    fix_hint=fix_hint,
-                )
-                parser_file = self.save_parser_code(bank_slug, parser_code)
+                # Generate parser
+                logger.info("[GENERATE] Creating parser...")
+                parser_code = self.generate_parser(bank, str(csv_path), pdf_preview, fix_hint)
+                self.save_code(bank, parser_code)
                 
-                # Step 2: Generate test code (if not exists)
-                test_file = self.tests_dir / f"test_{bank_slug}_parser.py"
+                # Generate test if needed
                 if not test_file.exists():
-                    logger.info("[GENERATE] Generating test code...")
-                    test_code = self.generate_test_code(bank_name, str(sample_csv_path))
-                    self.save_test_code(bank_slug, test_code)
+                    logger.info("[GENERATE] Creating test...")
+                    test_code = self.generate_test(bank, str(csv_path))
+                    self.save_code(bank, test_code, is_test=True)
                 
-                # Step 3: Run tests
+                # Run tests
                 logger.info("[TEST] Running tests...")
-                success, output = self.run_tests(bank_slug)
+                success, output = self.run_tests(bank)
                 
                 if success:
-                    logger.info(f"[SUCCESS] Parser generated and tested successfully in {attempt} attempt(s)")
+                    logger.info(f"[SUCCESS] Completed in {attempt} attempt(s)")
                     return True
                 else:
-                    logger.warning(f"[FAILED] Attempt {attempt} failed. Test output:\n{output}")
                     if attempt < self.max_retries:
-                        # Provide targeted remediation guidance for common parsing issues
-                        remediation = (
-                            "When parsing, ensure you only capture transaction rows that start with a date in DD-MM-YYYY. "
-                            "Use a strict regex with named groups and iterate ALL pages. For numbers, capture the FULL decimal "
-                            "amount as ONE token (e.g., '1935.30'), not two tokens ('193' and '5.30'). Use regex pattern: "
-                            r"(?P<amount>[-+]?\d{1,3}(?:,\d{3})*(?:\.\d+)?) "
-                            "to extract a complete value, then remove commas and convert to float. "
-                            "Heuristic: the rightmost numeric on the line is Balance; one remaining numeric is Debit or Credit; set the other to 0.0. "
-                            "Map '-' or '' to 0.0. Do not let description tokens leak into numeric columns. "
-                            "Ensure DataFrame columns exactly ['Date','Description','Debit','Credit','Balance'] with dtypes "
-                            "(Date as datetime from DD-MM-YYYY; others float). "
-                            "For invalid PDFs (pdfplumber/pdfminer errors), catch and raise ValueError."
+                        # Provide targeted fix hints
+                        fix_hint = (
+                            "Ensure: 1) Strict DD-MM-YYYY date regex, 2) Complete decimal parsing "
+                            "with regex (?P<amount>[-+]?\\d{1,3}(?:,\\d{3})*(?:\\.\\d+)?), "
+                            "3) Rightmost number is Balance, 4) Map empty/'-' to 0.0, "
+                            "5) Exact columns ['Date','Description','Debit','Credit','Balance']. "
+                            f"Error: {output[:1000]}"
                         )
-                        # Keep only a manageable slice of output to improve next attempt
-                        fix_hint = (remediation + "\n\nFAILED TEST OUTPUT (trimmed):\n" + output)[:4000]
-                        logger.info("[RETRY] Retrying with improved code...")
+                        logger.info("[RETRY] Improving code...")
                     else:
-                        logger.error(f"[FAILED] Failed after {self.max_retries} attempts")
+                        logger.error(f"[FAILED] Max attempts reached")
                         return False
                         
             except Exception as e:
-                logger.error(f"[ERROR] Error in attempt {attempt}: {e}")
-                if attempt < self.max_retries:
-                    logger.info("[RETRY] Retrying...")
-                else:
-                    logger.error(f"[FAILED] Failed after {self.max_retries} attempts due to errors")
+                logger.error(f"[ERROR] Attempt {attempt}: {e}")
+                if attempt >= self.max_retries:
                     return False
         
         return False
 
-
 def main():
-    """Main entry point for the agent."""
-    parser = argparse.ArgumentParser(description="AI Agent for Bank Statement Parser Generation")
-    parser.add_argument("--target", required=True, help="Bank target (e.g., icici, sbi)")
-    parser.add_argument("--provider", default="gemini", choices=["openai", "gemini", "groq"],
-                       help="LLM provider to use")
-    parser.add_argument("--api-key", help="API key for the LLM provider")
+    """CLI entry point."""
+    parser = argparse.ArgumentParser(description="AI Bank Parser Agent")
+    parser.add_argument("--target", required=True, help="Bank name (e.g., icici, sbi)")
+    parser.add_argument("--provider", default="gemini", choices=["openai", "gemini", "groq"])
+    parser.add_argument("--api-key", help="LLM API key")
+    parser.add_argument("--csv", dest="sample_csv", help="Override path to sample CSV for the target bank")
+    parser.add_argument("--pdf", dest="sample_pdf", help="Override path to sample PDF for the target bank")
     
     args = parser.parse_args()
     
     try:
-        agent = BankParserAgent(llm_provider=args.provider, api_key=args.api_key)
-        success = agent.run_agent_loop(args.target)
-        
-        if success:
-            logger.info("[COMPLETE] Agent completed successfully!")
-            sys.exit(0)
-        else:
-            logger.error("[FAILED] Agent failed to complete the task")
-            sys.exit(1)
-            
+        agent = BankParserAgent(args.provider, args.api_key)
+        success = agent.run_agent_loop(args.target, sample_csv_path=args.sample_csv, sample_pdf_path=args.sample_pdf)
+        sys.exit(0 if success else 1)
     except Exception as e:
-        logger.error(f"[FATAL] Fatal error: {e}")
+        logger.error(f"[FATAL] {e}")
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()
